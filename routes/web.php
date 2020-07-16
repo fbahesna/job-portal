@@ -11,6 +11,29 @@
 |
 */
 
-$router->get('/', function () use ($router) {
-    return $router->app->version();
+// $router->get('/', function () use ($router) {
+//     return $router->app->version();
+// });
+
+// $router->get('/key',function(){
+//     return str_random(32);
+// });
+
+$router->get("/",'homeController@index');
+$router->post("/register", "authController@register");
+$router->post("/login", "authController@login");
+
+$router->group(['middleware' => 'auth'], function () use ($router) {
+
+    $router->group(['prefix' => 'user'], function($router){
+        $router->get('/','userController@index');
+        $router->get('/profile','userController@profile');
+    });
+
+    $router->group(['prefix' => 'dashboard'], function($router){
+        $router->get('/','dashController@index');
+        $router->get('/job-list','dashController@jobList');
+        $router->get('/job-list-detail','dashController@jobListDetail');
+    });
 });
+
