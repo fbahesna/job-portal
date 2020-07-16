@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Model\User;
@@ -35,20 +36,20 @@ class authController extends Controller
             "email" => $email,
             "password" => $hashPwd,
         ];
-        
+
         DB::beginTransaction();
         try{
             $create_user = User::create($data);
-                //sekaligus menambah untuk role user
+            //sekaligus menambah untuk role user
             role::create([
-                "user_id" => 5,
+                "user_id" => $create_user->id,
                 "role_number" => 2,
                 "created_at" => date("Y-m-d H:i:s")
             ]);
 
             $data = [
                 "message" => "register_success",
-                "code"    => 201,
+                "status"    => 201,
             ];
 
             DB::commit();
@@ -56,13 +57,13 @@ class authController extends Controller
             $data = [
                 "message" => "register_failed",
                 "reason" => $e,
-                "code"   => 404,
+                "status"   => 404,
             ];
             
             DB::rollback();
         }
  
-        return response()->json($data, $data['code']);
+        return response()->json($data, $data['status']);
     }
 
 
@@ -81,12 +82,12 @@ class authController extends Controller
         if (!$user) {
             $data = [
                 "message" => "login_failed",
-                "code"    => 401,
+                "status"    => 401,
                 "result"  => [
                     "token" => null,
                 ]
             ];
-            return response()->json($data, $data['code']);
+            return response()->json($data, $data['status']);
         }
  
         if (Hash::check($password, $user->password)) {
@@ -98,7 +99,7 @@ class authController extends Controller
  
             $out = [
                 "message" => "login_success",
-                "code"    => 200,
+                "status"    => 200,
                 "result"  => [
                     "token" => $new_token,
                 ]
@@ -106,14 +107,14 @@ class authController extends Controller
         } else {
             $out = [
                 "message" => "login_vailed",
-                "code"    => 401,
+                "status"    => 401,
                 "result"  => [
                     "token" => null,
                 ]
             ];
         }
  
-        return response()->json($out, $out['code']);
+        return response()->json($out, $out['status']);
     }
 
     function generateRandomString($length = 80)

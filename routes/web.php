@@ -30,10 +30,16 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
         $router->get('/profile','userController@profile');
     });
 
-    $router->group(['prefix' => 'dashboard'], function($router){
-        $router->get('/','dashController@index');
-        $router->get('/job-list','dashController@jobList');
-        $router->get('/job-list-detail','dashController@jobListDetail');
+    $router->group(['middleware' => 'checkAdmin'], function () use ($router) {
+
+        $router->group(['prefix' => 'dashboard'], function() use ($router){
+            $router->post('/dashboard','dashController@index');
+            $router->get('/job-list','dashController@jobList');
+            $router->post('/createJob','dashController@createJob');
+            $router->put('/update-job/{id}','dashController@updateJob');
+            $router->put('/update-job-status/{id}','dashController@updateJobStatus');
+        }); 
     });
+
 });
 
