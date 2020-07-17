@@ -21,10 +21,10 @@ class Authenticate
      * @param  \Illuminate\Contracts\Auth\Factory  $auth
      * @return void
      */
-    public function __construct(Auth $auth)
-    {
-        $this->auth = $auth;
-    }
+    // public function __construct(Auth $auth)
+    // {
+    //     $this->auth = $auth;
+    // }
 
     /**
      * Handle an incoming request.
@@ -44,16 +44,16 @@ class Authenticate
     // }
     public function handle($request, Closure $next, $guard = null)
     {
-        if($request->input('token')){
-            $check = User::where('token',$request->input('token'))->first();
-
+        // dd($request->get('token'));
+        if($request->get('token')){
+            $check = User::where('token',$request->get('token'))->first();
             if(!$check){
                 return response('Token tidak valid.',401);
             }else{
                 return $next($request);
             }
         }else{
-            return response('Token tidak valid.',401);
+            return response('Token tidak valid atau user belum login.',401);
         }
     }
 }

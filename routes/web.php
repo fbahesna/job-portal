@@ -27,18 +27,31 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
 
     $router->group(['prefix' => 'user'], function($router){
         $router->get('/','userController@index');
-        $router->get('/profile','userController@profile');
+        $router->post('/user-profile','userController@userProfile');
+        $router->post('/user-fill-identity','userController@userFillIdentity');
+        $router->put('/user-edit','userController@userEditIdentity');
     });
 
     $router->group(['middleware' => 'checkAdmin'], function () use ($router) {
 
-        $router->group(['prefix' => 'dashboard'], function() use ($router){
-            $router->post('/dashboard','dashController@index');
+        $router->group(['prefix' => 'dashboard'], function($router){
+            $router->post('/','dashController@index');
             $router->get('/job-list','dashController@jobList');
             $router->post('/createJob','dashController@createJob');
-            $router->put('/update-job/{id}','dashController@updateJob');
-            $router->put('/update-job-status/{id}','dashController@updateJobStatus');
-        }); 
+            $router->post('/update-job','dashController@updateJob');
+            $router->post('/update-job-status','dashController@updateJobStatus');
+
+            $router->post('/job-status','dashController@jobStatus');
+            $router->get('/show-job-submit','dashController@showJobSubmit');
+            $router->post('/show-job-submited','dashController@showJobSubmited');
+        });
+
+    });
+
+    $router->group(['prefix' => 'freelance'], function() use ($router){
+        $router->get('/','freelanceController@index');
+        $router->get('/show-job-list','freelanceController@showJobList');
+        $router->post('/job-submit','freelanceController@jobSubmit');
     });
 
 });
