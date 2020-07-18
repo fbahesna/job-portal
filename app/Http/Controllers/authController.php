@@ -78,7 +78,13 @@ class authController extends Controller
         $password = $request->input("password");
 
         $user = User::where("email", $email)->first();
- 
+
+        $get_user_role = DB::table('users as u')
+            ->Join('user_roles as ur','u.id','=','ur.user_id')
+            ->Where('u.id',$user->id)
+            ->select('ur.role_number as user_role')
+            ->first();
+
         if (!$user) {
             $data = [
                 "message" => "login_failed",
@@ -100,20 +106,21 @@ class authController extends Controller
             $out = [
                 "message" => "login_success",
                 "status"    => 200,
+                "user_role" => $get_user_role->user_role,
                 "result"  => [
                     "token" => $new_token,
                 ]
             ];
         } else {
             $out = [
-                "message" => "login_vailed",
+                "message" => "login_failed",
                 "status"    => 401,
                 "result"  => [
                     "token" => null,
                 ]
             ];
         }
- 
+       
         return response()->json($out, $out['status']);
     }
 

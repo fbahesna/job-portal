@@ -36,7 +36,7 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
 
         $router->group(['prefix' => 'dashboard'], function($router){
             $router->post('/','dashController@index');
-            $router->get('/job-list','dashController@jobList');
+            $router->post('/job-list','dashController@jobList');
             $router->post('/createJob','dashController@createJob');
             $router->post('/update-job','dashController@updateJob');
             $router->post('/update-job-status','dashController@updateJobStatus');
@@ -50,7 +50,7 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
 
     $router->group(['prefix' => 'freelance'], function() use ($router){
         $router->get('/','freelanceController@index');
-        $router->get('/show-job-list','freelanceController@showJobList');
+        $router->post('/show-job-list','freelanceController@showJobList');
         $router->post('/job-submit','freelanceController@jobSubmit');
     });
 

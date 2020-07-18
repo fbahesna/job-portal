@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Model\user_identitys as identity;
 use Illuminate\Http\Request;
+use App\Http\Model\User;
 use DB;
 
 use Laravel\Lumen\Routing\Controller as BaseController;
@@ -22,47 +23,76 @@ class userController extends BaseController
 
     public function userProfile(Request $request)
     {
-        dd($request->get('user_id'));
         return identity::find($request->input('user_id'));
     }
 
     public function userFillIdentity(Request $request)
     {
         $this->validate($request,[
+            "email" => 'required',
             "name" => 'required',
             "age" => 'required',
             "address" => 'required',
             "skills" => 'required',
         ]);
-
-       if(!$request->input('user_id') && !$request->get('token')){
+        
+       if(!$request->get('token')){
            return response()->json([
                "status" => 401,
                "message" => "User Not Registered!"
            ]);
        }else{
-           DB::beginTransaction();
-           try {
-            identity::create([
-                "user_id" => $request->input('user_id'),
-                "name" => $request->input('name'),
-                "age" => $request->input('age'),
-                "address" => $request->input('address'),
-                "skills" => $request->input('skills')
-            ]);
-            DB::commit();
+        $user_id = DB::table('users')->Where('email',$request->get('email'))->select('id')->first();
+        if($user_id == null){
             return response()->json([
-                "status" => 201 , "message" => "Identity Updated!"
+                "status" => 400 , "message" => "User Not Found"
             ]);
-
-           } catch (\Exception $e) {
-               DB::rollback();
-               return response()->json([
-                   "status" => 401 , "message" => "Error"
-               ]);
-           }
-
-       }
+        }
+        $check_user_identity =  DB::table('user_identitys')->where('user_id',$user_id->id)->first();
+        if($check_user_identity != null){
+            DB::beginTransaction();
+               try {
+                identity::update([
+                    "user_id" => $user_id->id,
+                    "name" => $request->input('name'),
+                    "age" => $request->input('age'),
+                    "address" => $request->input('address'),
+                    "skills" => $request->input('skills')
+                ]);
+                DB::commit();
+                return response()->json([
+                    "status" => 201 , "message" => "Identity Updated!"
+                ]);
+    
+               } catch (\Exception $e) {
+                   DB::rollback();
+                   return response()->json([
+                       "status" => 401 , "message" => "Error"
+                   ]);
+               }
+        }else{
+            DB::beginTransaction();
+               try {
+                identity::create([
+                    "user_id" => $user_id->id,
+                    "name" => $request->input('name'),
+                    "age" => $request->input('age'),
+                    "address" => $request->input('address'),
+                    "skills" => $request->input('skills')
+                ]);
+                DB::commit();
+                return response()->json([
+                    "status" => 201 , "message" => "Identity Updated!"
+                ]);
+    
+               } catch (\Exception $e) {
+                   DB::rollback();
+                   return response()->json([
+                       "status" => 401 , "message" => "Error"
+                   ]);
+               }
+            }
+        }
     }
 
     public function userEditIdentity(Request $request)
@@ -75,7 +105,6 @@ class userController extends BaseController
         ]);
         DB::beginTransaction();
         try {
-
             DB::table('user_identitys')
                     ->Where('user_id',$request->input('user_id'))
                     ->update([
@@ -94,8 +123,5 @@ class userController extends BaseController
                 "status" => 401 , "message" => "Error"
             ]);
         }
-
-        
-
     }
 }
